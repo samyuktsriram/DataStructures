@@ -15,7 +15,7 @@ typedef struct Node {
 }
 Node;
 
-int main(int argc, char **argv){
+int trial1(void){
     int i, val; // will be used in the interaction of the program
 
     // These two will help get the list started
@@ -40,5 +40,43 @@ int main(int argc, char **argv){
         i = i + 1;
     }
     printf("Linked list created, it is %d long", i);
+    return 0;
+}
+
+int add_elements(Node * temp){
+    int i, val; // will be used in the interaction of the program
+
+    i = 0; //This will be a length counter
+    while(1){
+        printf("Enter the integer to add in the list. Enter -ve number to stop \n");
+        scanf("%d", &val);
+        // if (inp_data<0){break;}
+        if (val<0){return 1;}
+        temp-> next = malloc(sizeof(Node));
+        temp = temp-> next;
+        temp->data = val;
+        temp -> next = NULL;
+        i = i+1;
+    }
+    printf("Linked list created, it is %d long", i);
+    return 0;
+}
+
+int main(void){
+
+    // Setting up the linked list
+
+    Node * head = NULL;
+    Node * temp = NULL;
+
+    temp->next = malloc(sizeof(Node)); //This doesn't seem to work?
+    temp = temp -> next;
+    temp -> data = 9; // Just creating the Head node
+    temp -> next = NULL;
+
+    head = temp;
+
+    add_elements(temp);
+
     return 0;
 }
