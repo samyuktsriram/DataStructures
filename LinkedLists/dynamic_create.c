@@ -45,37 +45,39 @@ int main(void){
     while(1){
         printf("%d\n", temp->data);
         count = count+1;
-        if (temp->next == NULL){break;}
+        if (temp->next == NULL){printf("Count: %d \n",count); break;}
         temp = temp->next;
     }
 
 
     printf("Here's the first half of the linked list\n");
     //printing half the elements with the tortoise and rabbit algo
+    int c;
+    c=0;
     Node* rab = head;
     Node* tort = head;
     while(1){
         printf("%d\n", tort->data);
-        if (rab->next == NULL){break;} else if (rab->next->next == NULL){break;}
+        c = c+1;
+        if (rab->next == NULL){printf("Count: %d \n",c);break;} else if (rab->next->next == NULL){printf("Count: %d \n",c);break;}
         rab = rab->next->next;
         tort = tort->next;
     }
 
-    //Creating a loop, this assumes there are more than 6 elements in the list
+    //Creating a loop, this assumes there are more than ~6 elements in the list
 
     //head->next->next->next->next->next->next = head->next;
 
     // Detecting a loop function -> works if there is a loop. Segment fault if there isn't, figure it out
 
-    rab = head;
-    tort = head;
+    Node* rabbit = head;
+    Node* tortoise = head;
     while(1){
-        printf("%d\n", tort->data);
-        if (rab->next == NULL){printf("No Loops here");break;} else if (rab->next->next == NULL){printf("No Loops here");break;}
-        rab = rab->next->next;
-        tort = tort->next;
-        if (rab->next == tort->next | rab->next->next == tort->next){printf("LOOP ALERT LOOP ALERT");break;}
+        printf("%d\n", tortoise->data);
+        if (rabbit->next == NULL){printf("No Loops here"); break;} else if (rabbit->next->next == NULL){printf("No Loops here"); break;}
+        rabbit = rabbit->next->next;
+        tortoise = tortoise->next;
+        if (rabbit->next == tortoise | rabbit == tortoise){printf("LOOP ALERT LOOP ALERT");break;}
     }
-
     return 0;
 }
