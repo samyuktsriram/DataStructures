@@ -38,11 +38,43 @@ int main(void){
 
     printf("Here's your linked list \n");
 
+    //Printing all the elements
+    int count;
+    count = 0; //just to know the length
     temp = head;
     while(1){
         printf("%d\n", temp->data);
+        count = count+1;
         if (temp->next == NULL){break;}
         temp = temp->next;
+    }
+
+
+    printf("Here's the first half of the linked list\n");
+    //printing half the elements with the tortoise and rabbit algo
+    Node* rab = head;
+    Node* tort = head;
+    while(1){
+        printf("%d\n", tort->data);
+        if (rab->next == NULL){break;} else if (rab->next->next == NULL){break;}
+        rab = rab->next->next;
+        tort = tort->next;
+    }
+
+    //Creating a loop, this assumes there are more than 6 elements in the list
+
+    //head->next->next->next->next->next->next = head->next;
+
+    // Detecting a loop function -> works if there is a loop. Segment fault if there isn't, figure it out
+
+    rab = head;
+    tort = head;
+    while(1){
+        printf("%d\n", tort->data);
+        if (rab->next == NULL){printf("No Loops here");break;} else if (rab->next->next == NULL){printf("No Loops here");break;}
+        rab = rab->next->next;
+        tort = tort->next;
+        if (rab->next == tort->next | rab->next->next == tort->next){printf("LOOP ALERT LOOP ALERT");break;}
     }
 
     return 0;
