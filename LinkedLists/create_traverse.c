@@ -2,7 +2,7 @@
 //references : https://cs50.harvard.edu/college/2019/fall/notes/5/
 
 
-// I don't know what the scene here is lmao
+// I don't know why this doesn't work, keeping for future ref
 
 
 #include <stdio.h>
@@ -11,7 +11,7 @@
 // Define what a house is
 typedef struct Node {
     int data; //define person 1 and what they know
-    struct Node * next; // define person 2 and what they know
+    struct Node* next; // define person 2 and what they know
 }
 Node;
 
@@ -19,8 +19,8 @@ int trial1(void){
     int i, val; // will be used in the interaction of the program
 
     // These two will help get the list started
-    Node * head = NULL;
-    Node * temp = NULL;
+    Node* head = NULL;
+    Node* temp = NULL;
 
     i = 0; //This will be a length counter
     val = 1; // This starts off as non-zero to begin the loop
@@ -43,7 +43,7 @@ int trial1(void){
     return 0;
 }
 
-int add_elements(Node * temp){
+int add_elements(Node* temp){
     int i, val; // will be used in the interaction of the program
 
     i = 0; //This will be a length counter
@@ -66,8 +66,8 @@ int main(void){
 
     // Setting up the linked list
 
-    Node * head = NULL;
-    Node * temp = NULL;
+    Node* head = NULL;
+    Node* temp = NULL;
 
     temp->next = malloc(sizeof(Node)); //This doesn't seem to work?
     temp = temp -> next;
