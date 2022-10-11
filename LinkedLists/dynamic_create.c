@@ -43,6 +43,20 @@ void print_linkedlist(Node* head){
     }
 }
 
+int len_linkedlist(Node* head){
+    Node* temp = NULL;
+
+    int count;
+    count = 0;
+    temp = head;
+    while(1){
+        if (temp->next == NULL){count = count+1; break;}
+        temp = temp->next;
+        count = count+1;;
+    }
+    return count;
+}
+
 void print_half_tr(Node* head){
     printf("Here's the first half of the linked list\n");
     //printing half the elements with the tortoise and rabbit algo
@@ -124,18 +138,33 @@ Node* skip_chunk(int k, Node* temp){
 }
 
 Node* chunk_reverse(int chunk, Node* head){
-    Node* current = head;
-    Node* prev = NULL;
-    Node* temp = NULL;
+    
+    //https://www.youtube.com/watch?v=Of0HPkk3JgI&ab_channel=takeUforward
+    if((chunk==1) || (head == NULL)){return head;}
 
-    while(current){
-        temp = skip_chunk(chunk,current);
-        current-> next = prev;
+    Node* dummy = (Node*)malloc(sizeof(Node));
+    dummy->next = head;
+
+    Node* current = dummy;
+    Node* prev = dummy;
+    Node* temp = dummy;
+
+
+    int len = len_linkedlist(head);
+
+    while(chunk<=len){
+        current = prev->next;
+        temp = current -> next;
+        for(int k=1;k<chunk;k=k+1){
+            current -> next = temp->next;
+            temp -> next = prev -> next;
+            prev-> next = temp;
+            temp = current -> next;
+        }
         prev = current;
-        current = temp;
-
+        len = len - chunk;
     }
-    return prev;
+    return dummy->next;
 }
 
 int main(void){
