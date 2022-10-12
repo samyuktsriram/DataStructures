@@ -55,6 +55,21 @@ void print_array(int length, int* array){
     }
 }
 
+void bubble_sort(int length, int* array){
+
+    //INV: array[0..k] is unsorted, 1<=k<=length
+    for(int i = 0; i<length; i++){
+        for(int k = 0; k<length-i-1;k++){
+            if(array[k]>array[k+1]){
+                int temp = array[k];
+                array[k] = array[k+1];
+                array[k+1] = temp;
+            }
+        }
+    }
+
+}
+
 int main(){
 
     srand(time(NULL));
@@ -63,10 +78,10 @@ int main(){
     printf("Enter the length of the array\n");
     scanf("%d", &len);
 
-    int* array = create_array_input(len);
+    int* array = create_array_rand(len);
 
     print_array(len,array);
-    selection_sort(len, array);
+    bubble_sort(len, array);
     print_array(len, array);
 
     free(array);
