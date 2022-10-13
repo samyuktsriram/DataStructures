@@ -167,6 +167,19 @@ Node* chunk_reverse(int chunk, Node* head){
     return dummy->next;
 }
 
+void free_linkedlist(Node* head){
+
+    Node* current = head;
+    Node* temp;
+
+    while(current){
+        temp = current-> next;
+        free(current);
+        current = temp;
+    }
+
+}
+
 int main(void){
 
 
@@ -194,7 +207,6 @@ int main(void){
 
     Node* chunked = chunk_reverse(4,rec_tail);
     print_linkedlist(chunked);
-
-
+    free_linkedlist(chunked);
     return 0;
 }
