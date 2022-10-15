@@ -82,6 +82,7 @@ int main(){
 
     print_array(len,array);
     bubble_sort(len, array);
+    //selection_sort(len,array);
     print_array(len, array);
 
     free(array);
