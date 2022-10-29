@@ -149,7 +149,7 @@ Node* chunk_reverse(int chunk, Node* head){
     Node* prev = dummy;
     Node* temp = dummy;
 
-
+    //calling a helper function to get the length of the linked list
     int len = len_linkedlist(head);
 
     while(chunk<=len){
