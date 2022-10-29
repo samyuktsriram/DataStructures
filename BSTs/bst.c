@@ -57,9 +57,28 @@ NodeAddress create_bst(int count){
 void print_inorder(NodeAddress root){
     if (root != NULL){ //Base case checking
         print_inorder(root->left);
-        printf("%d", root->val);
+        printf("%d ", root->val);
         print_inorder(root->right);
     }
+}
+
+//Find the first matching value
+NodeAddress search(int val, NodeAddress node){
+    if (node==NULL){return NULL;}
+    if (val == node->val){return node;}
+    else if (val <= node->val){return search(val, node->left);}
+    else // (val > node->val) This doesn't get checked i guess
+    {return search(val, node->right);}
+}
+
+//Insert a value, this doesnt work atm.
+
+void insert_element(int val, NodeAddress node){
+    if (node == NULL){ //If it's empty then insert it there only
+        node->val = val;
+    }
+    else if (val <= node->val) {insert_element(val, node->left);}
+    else {insert_element(val, node->right);}
 }
 
 int main(){
@@ -69,6 +88,15 @@ int main(){
 
     NodeAddress root;
     root = create_bst(length);
+    print_inorder(root);
+
+    printf("\n");
+
+    //print_inorder(search(7, root));
+    insert_element(4, root);
+    insert_element(4, root);
+    insert_element(400, root);
+
     print_inorder(root);
     return 0;
 }
