@@ -73,12 +73,16 @@ NodeAddress search(int val, NodeAddress node){
 
 //Insert a value, this doesnt work atm.
 
-void insert_element(int val, NodeAddress node){
+NodeAddress insert_element(int val, NodeAddress node){
     if (node == NULL){ //If it's empty then insert it there only
-        node->val = val;
+        NodeAddress newNode;
+        newNode = (NodeAddress)malloc(sizeof(struct nodeType)); //Create a new node
+        newNode->val = val;
+        node = newNode;
     }
-    else if (val <= node->val) {insert_element(val, node->left);}
-    else {insert_element(val, node->right);}
+    else if (val <= node->val) {node->left = insert_element(val, node->left);}
+    else {node->right = insert_element(val, node->right);}
+    return node;
 }
 
 int main(){
