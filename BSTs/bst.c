@@ -1,5 +1,6 @@
 // http://www.btechsmartclass.com/data_structures/binary-search-tree.html
 // Also using Professor's code
+//Delete reference: https://www.youtube.com/watch?v=hL9RUD33nYs&ab_channel=GateSmashers
 
 #include<stdio.h>
 #include<stdlib.h>
@@ -84,9 +85,40 @@ NodeAddress insert_element(int val, NodeAddress node){
     return node;
 }
 
-//Delete: reference: https://www.youtube.com/watch?v=hL9RUD33nYs&ab_channel=GateSmashers
+//This is useful in the deletion function. Assumes the node exists in the tree.
+NodeAddress find_parent(NodeAddress node, NodeAddress root){
+
+    //assert: node exists in the tree.
+    //(temp->left or right is the node) or find_parent(temp, node->left or right) is called
+
+    NodeAddress temp = node;
+
+    if (node==NULL || root == NULL){return NULL;}
+    //This is the first part of the invariant
+    if ((root->left == temp) || (root->right == temp)){return root;}
+
+    else if (temp->val <= root->val){return find_parent(node, root->left);}
+    else // (val > node->val) This doesn't get checked i guess
+    {return find_parent(node, root->right);}
+}
+
+
+//Finding the biggest element in a subtree
+
+NodeAddress find_biggest_element(NodeAddress root){
+
+    if (root==NULL){return NULL;}
+    NodeAddress temp = root;
+    while (temp->right != NULL)
+    {
+        temp = temp->right;
+    }
+    return temp;
+}
+//Delete
+//INCOMPLETE and strange
 //This function will delete based on NodeAddress, can be written to find a value with the search function.
-//Couple of cases to consider
+//Couple of cases to conside
 NodeAddress delete_element(NodeAddress node, NodeAddress root){
     //Base case
     if (node == NULL){return root;} //If the value isn't even in the tree we want to do nothing.
@@ -98,16 +130,32 @@ NodeAddress delete_element(NodeAddress node, NodeAddress root){
     else if ((node->left != NULL) && (node->right == NULL)){
         NodeAddress temp = node;
         //Find Grandparent, connect the grandparent -> left to child
+        find_parent(temp,root)->left = temp->left;
+        free(node);
+        return root;
     }
     else if ((node->left == NULL) && (node->right != NULL)){
         NodeAddress temp = node;
         //Find Grandparent, connect the grandparent -> right to child
+        find_parent(temp,root)->right = temp->right;
+        free(node);
+        return root;
     }
-
     //Case3: 2 children
-    //Find the biggest element in the left subtree
-    //call delete_element on it
-    //connect the grandparent to the found element
+    else {
+        //Find the biggest element in the left subtree
+        NodeAddress biggest = find_biggest_element(node->left); //node->left must exist bc we've eliminated previous cases.
+        NodeAddress dummy = biggest;
+        //call delete_element on it
+        delete_element(biggest, root);
+        //connect the grandparent to the found element
+        find_parent(node,root)->left = dummy;
+        dummy->left = node->left;
+        dummy->right = node->right;
+        free(node);
+        return root;
+    }
+    
 }
 int main(){
     int length;
@@ -117,7 +165,6 @@ int main(){
     NodeAddress root;
     root = create_bst(length);
     print_inorder(root);
-
     printf("\n");
 
     //print_inorder(search(7, root));
@@ -127,5 +174,19 @@ int main(){
     dummy = insert_element(400, root);
 
     print_inorder(root);
+    printf("\n");
+
+
+    //Testing helper functions
+    printf("%d\n", search(3,root)?(search(3,root)->val): NULL);
+    printf("%d\n", find_parent(search(400,root), root)->val);
+    printf("%d\n", find_biggest_element(root)->val);
+
+
+    dummy = delete_element(search(4,root), root);
+
+    print_inorder(root);
+    printf("\n");
+
     return 0;
 }
