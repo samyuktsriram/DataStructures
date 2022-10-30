@@ -71,8 +71,7 @@ NodeAddress search(int val, NodeAddress node){
     {return search(val, node->right);}
 }
 
-//Insert a value, this doesnt work atm.
-
+//Insert a value
 NodeAddress insert_element(int val, NodeAddress node){
     if (node == NULL){ //If it's empty then insert it there only
         NodeAddress newNode;
@@ -85,6 +84,31 @@ NodeAddress insert_element(int val, NodeAddress node){
     return node;
 }
 
+//Delete: reference: https://www.youtube.com/watch?v=hL9RUD33nYs&ab_channel=GateSmashers
+//This function will delete based on NodeAddress, can be written to find a value with the search function.
+//Couple of cases to consider
+NodeAddress delete_element(NodeAddress node, NodeAddress root){
+    //Base case
+    if (node == NULL){return root;} //If the value isn't even in the tree we want to do nothing.
+
+    //Case1: No children
+    if ((node->left == NULL) && (node->right == NULL)) {free(node); return root;}
+
+    //Case2: 1 child
+    else if ((node->left != NULL) && (node->right == NULL)){
+        NodeAddress temp = node;
+        //Find Grandparent, connect the grandparent -> left to child
+    }
+    else if ((node->left == NULL) && (node->right != NULL)){
+        NodeAddress temp = node;
+        //Find Grandparent, connect the grandparent -> right to child
+    }
+
+    //Case3: 2 children
+    //Find the biggest element in the left subtree
+    //call delete_element on it
+    //connect the grandparent to the found element
+}
 int main(){
     int length;
     printf("Enter the number elements \n");
@@ -97,9 +121,10 @@ int main(){
     printf("\n");
 
     //print_inorder(search(7, root));
-    insert_element(4, root);
-    insert_element(4, root);
-    insert_element(400, root);
+    NodeAddress dummy;
+    dummy = insert_element(4, root);
+    dummy = insert_element(4, root);
+    dummy = insert_element(400, root);
 
     print_inorder(root);
     return 0;
