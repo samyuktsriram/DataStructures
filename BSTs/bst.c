@@ -102,7 +102,6 @@ NodeAddress find_parent(NodeAddress node, NodeAddress root){
     {return find_parent(node, root->right);}
 }
 
-
 //Finding the biggest element in a subtree
 
 NodeAddress find_biggest_element(NodeAddress root){
@@ -157,6 +156,7 @@ NodeAddress delete_element(NodeAddress node, NodeAddress root){
     }
     
 }
+
 int main(){
     int length;
     printf("Enter the number elements \n");
@@ -178,12 +178,12 @@ int main(){
 
 
     //Testing helper functions
-    printf("%d\n", search(3,root)?(search(3,root)->val): NULL);
+    //printf("%d\n", search(3,root)?(search(3,root)->val): NULL);
     printf("%d\n", find_parent(search(400,root), root)->val);
     printf("%d\n", find_biggest_element(root)->val);
 
 
-    dummy = delete_element(search(4,root), root);
+    dummy = delete_element(search(2,root), root);
 
     print_inorder(root);
     printf("\n");
