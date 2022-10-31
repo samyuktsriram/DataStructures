@@ -21,9 +21,49 @@ int* create_array_rand(int length){
     return ptr;
 }
 
-void selection_sort(int length, int* array){
+void swap(int* array, int index1, int index2){
+    int temp = array[index2];
+    array[index2] = array[index1];
+    array[index1] = temp;
+}
 
-//Doesn't work lmao
+int partition(int* array, int start, int stop){
+    //returns an index, everything to the left is smaller and everything to the right is greater
+    //This isn't the best way, find better ones
+
+    //pick a random number between start and stop, swap to 0.
+    int r = (rand() % (stop - start)) + start;
+
+    //swap array[start] and array[r]
+    swap(array, start, r);
+
+    int pivot = array[start];
+    int i = start + 1;
+    int j = stop;
+
+    //INV: left of i <= pivot and right of j > pivot
+    while (i<=j){
+        if (array[i]>pivot){
+            swap(array, i,j);
+            j = j-1;
+        } else {i=i+1;}
+    }
+    swap(array, start, j);
+    return j;
+}
+
+void quick_sort(int* array, int start, int stop){
+    //We need a few base cases
+    if (array != NULL || start>stop){return;}
+    if (start < 0 || stop < 0){return;}
+
+    int p = partition(array, start, stop);
+
+    quick_sort(array, start, p-1);
+    quick_sort(array, p+1, stop);
+}
+
+void selection_sort(int length, int* array){
 
     //INV: 0-k is sorted, 0<=k<length-1
     for(int k = 0; k < length - 1; k++){
@@ -81,8 +121,10 @@ int main(){
     int* array = create_array_rand(len);
 
     print_array(len,array);
-    bubble_sort(len, array);
+    //bubble_sort(len, array);
     //selection_sort(len,array);
+
+    quick_sort(array, 0, len-1);
     print_array(len, array);
 
     free(array);
