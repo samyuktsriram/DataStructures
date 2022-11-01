@@ -21,6 +21,12 @@ int* create_array_rand(int length){
     return ptr;
 }
 
+void swap2(int* x, int* y){
+    int temp = *y;
+    *y = *x;
+    *x = temp;
+}
+
 void swap(int* array, int index1, int index2){
     int temp = array[index1];
     array[index1] = array[index2];
@@ -35,7 +41,8 @@ int partition(int* array, int start, int stop){
     int r = rand()%(stop-start) + start;
 
     //swap array[start] and array[r]
-    swap(array, start, r);
+    //swap(array, start, r);
+    swap2(&array[start], &array[r]);
 
     int pivot = array[start];
     int i = start+1;
@@ -44,11 +51,13 @@ int partition(int* array, int start, int stop){
     //INV: left of i <= pivot and right of j > pivot
     while (i<=j){
         if (array[i]>pivot){
-            swap(array, i, j);
+            //swap(array, i, j);
+            swap2(&array[i], &array[j]);
             j=j-1;
         } else{i++;}
     }
-    swap(array, j, start);
+    //swap(array, j, start);
+    swap2(&array[start], &array[j]);
     return j;
 }
 
