@@ -22,9 +22,9 @@ int* create_array_rand(int length){
 }
 
 void swap(int* array, int index1, int index2){
-    int temp = array[index2];
-    array[index2] = array[index1];
-    array[index1] = temp;
+    int temp = array[index1];
+    array[index1] = array[index2];
+    array[index2] = temp;
 }
 
 int partition(int* array, int start, int stop){
@@ -32,29 +32,29 @@ int partition(int* array, int start, int stop){
     //This isn't the best way, find better ones
 
     //pick a random number between start and stop, swap to 0.
-    int r = (rand() % (stop - start)) + start;
+    int r = rand()%(stop-start) + start;
 
     //swap array[start] and array[r]
     swap(array, start, r);
 
     int pivot = array[start];
-    int i = start + 1;
+    int i = start+1;
     int j = stop;
 
     //INV: left of i <= pivot and right of j > pivot
     while (i<=j){
         if (array[i]>pivot){
-            swap(array, i,j);
-            j = j-1;
-        } else {i=i+1;}
+            swap(array, i, j);
+            j=j-1;
+        } else{i++;}
     }
-    swap(array, start, j);
+    swap(array, j, start);
     return j;
 }
 
 void quick_sort(int* array, int start, int stop){
     //We need a few base cases
-    if (array != NULL || start>stop){return;}
+    if (array == NULL || start>=stop){return;}
     if (start < 0 || stop < 0){return;}
 
     int p = partition(array, start, stop);
@@ -91,8 +91,9 @@ void print_array(int length, int* array){
     printf("Here's your array! \n");
 
     for(int i = 0; i<length; i++){
-        printf("%d\n", array[i]);
+        printf("%d ", array[i]);
     }
+    printf("\n");
 }
 
 void bubble_sort(int length, int* array){
