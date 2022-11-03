@@ -123,7 +123,61 @@ void selection_sort_LL(Node* head){
 
 }
 
-void quicksort(Node* head, Node* start, node* stop){
+Node* end(Node* head){
+    Node* temp = head;
+    while (temp->next != NULL)
+    {
+        temp = temp->next;
+    }
+    return temp;
+}
+
+//This is O(n)
+Node* prev(Node* head, Node* end){
+
+    if (head==NULL||end==NULL){return head;}
+    Node* temp = head;
+    //assert head is always before end
+    while (temp->next != end)
+    {
+        temp = temp->next;
+        if (temp->next == NULL) {break;}
+    }
+    return temp;
+}
+
+Node* partition_LL(Node* start, Node* stop){
+
+    if (stop == start || start == NULL || stop == NULL){return start;}
+    Node* pivot = start;
+    Node* i = start->next;
+    Node* j = stop;
+    
+    while((j->next != i)) {
+        if (i->data > pivot->data){
+            swap2(&(i->data), &(j->data));
+            j = prev(start,j);
+        } else {i=i->next;}
+
+    }
+    swap2(&(j->data), &(start->data));
+    return j;
+
+}
+
+//Might be easier to do with a doubly linked list. This code has a bug somewhere. FIND
+void quick_sort_LL(Node* start, Node* stop){
+
+    if (stop == start) {return;} //Unsure about this base case
+    if (start == NULL || stop == NULL) {return;}
+
+    Node* p = partition_LL(start, stop); //this needs to return p-1
+
+    //Check these cases
+    if(p!=NULL){quick_sort_LL(start, prev(start, p));}
+    if (p==start && p!=NULL){quick_sort_LL(p->next, stop);}
+    else if (p!=NULL && p->next != NULL) {quick_sort_LL(p->next, stop);}
+    
     
 }
 
@@ -133,11 +187,12 @@ int main(){
     int length = 10;
 
     Node* head;
-
     head = create_linkedlist_rand(length);
+    Node* last = end(head);
     print_linkedlist(head);
     //swap2(&(head->data), &(head->next->next->data));
-    selection_sort_LL(head);
+    quick_sort_LL(head, last);
+    
     print_linkedlist(head);
     free_linkedlist(head);
     return 0;

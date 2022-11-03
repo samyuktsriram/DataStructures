@@ -120,6 +120,90 @@ void bubble_sort(int length, int* array){
 
 }
 
+void insertion_sort(int length, int* array){
+
+    int i, current, j;
+
+    //INV: a[0..i] is sorted and 0<i<length
+    for(i=1; i<length; i++){
+
+        current = array[i];
+        j = i-1;
+
+        //INV: array[0..j] < current and j>=0, j+1 is the insertion point
+        while (j>=0 && array[j] > current){
+            //push j up so there's space for current. This is where to insert
+            array[j+1] = array[j];
+            j--;
+        }
+        array[j+1] = current;
+    }
+}
+
+void siftdown_max(int* array, int length, int index){
+    
+    if (index > length){return;}
+    
+    int child1 = 2*index + 1;
+    int child2 = 2*index + 2;
+
+    //assert: child1 and child2 are in the array
+
+    if (child1<=length && child2 <= length){
+        int diff1 = array[index] - array[child1];
+        int diff2 = array[index] - array[child2];
+
+        if (abs(diff1) < abs(diff2) && diff2<0){swap2(&array[index], &array[child2]);}
+        else if (abs(diff1) >= abs(diff2) && diff1<0){swap2(&array[index], &array[child1]);}
+        
+    }
+    if (child1<= length && child2 > length){
+        int diff1 = array[index] - array[child1];
+        if (diff1<0){swap2(&array[index], &array[child1]);}
+    }
+
+    if (child2<= length && child1 > length){
+        int diff2 = array[index] - array[child2];
+        if (diff2<0){swap2(&array[index], &array[child1]);}
+    }
+
+    siftdown_max(array, length, child1);
+    siftdown_max(array, length, child2);
+
+}
+void max_heapify(int* array, int length){
+    int node;
+    for(node = length/2;node>=0;node--){
+        siftdown_max(array, length, node);
+    }   
+}
+void swapLastMax(int* array, int length){
+    //assert: array is heapified.
+
+    swap2(&array[0], &array[length-1]);
+    siftdown_max(array, length-2, 0);
+}
+
+
+void heap_sort(int* array, int length){
+
+    //This is selection sort, except we are using a heap to find the largest element.
+    //O(n) to heapify, O(nlogn) to sort.
+
+    max_heapify(array, length);
+    for(int i=0; i<length; i++){
+        //int p = findMaxPos(array, n-i); //Because we're adding the largest element at the end.
+        //int p = 0; //since we've got a heap, we can do this
+        //swap2(&array[p], &array[length-1-i]);
+
+
+
+        //We're going to do those 2 steps together
+        swapLastMax(array, length-i); // But this is something we do with heaps
+    }
+}
+
+
 int main(){
 
     srand(time(NULL));
@@ -133,8 +217,9 @@ int main(){
     print_array(len,array);
     //bubble_sort(len, array);
     //selection_sort(len,array);
-
-    quick_sort(array, 0, len-1);
+    //insertion_sort(len, array);
+    //quick_sort(array, 0, len-1);
+    heap_sort(array, len);
     print_array(len, array);
 
     free(array);
