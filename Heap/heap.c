@@ -19,16 +19,26 @@ void swap2(int* x, int* y){
 
 
 //Sift_Down method for extraction
+void siftup_max(int* array, int length, int index){
+    if (index > length || index < 0 || (index - 1) / 2 < 0){return;}
 
+    int parent = (index - 1) / 2;
+
+    int diff1 = array[parent] - array[index];
+    if (diff1<0){swap2(&array[parent], &array[index]);}
+
+    siftup_max(array, length, index-1);
+}
 
 void siftdown_max(int* array, int length, int index){
     
-    if (index > length){return;}
+    if (index > length || index < 0){return;}
     
     int child1 = 2*index + 1;
     int child2 = 2*index + 2;
 
     //assert: child1 and child2 are in the array
+    //Rest are base cases
 
     if (child1<=length && child2 <= length){
         int diff1 = array[index] - array[child1];
@@ -112,6 +122,33 @@ int* create_array_rand(int length){
     }
     return ptr;
 }
+int* create_heap_input(int length){
+    int* ptr = malloc(length * sizeof(int));
+    for(int i=0; i<length; i++){
+        printf("Enter the %d th element\n", i);
+        scanf("%d", &ptr[i]);
+        siftup_max(ptr, i, i);
+    }
+    return ptr;
+}
+
+
+int* insert_element(int* array, int length, int element){
+
+    //Copy the array into bigger memory space,
+    //Set last element as needed
+    //Siftup to maintain heap
+    //free old memory
+
+    int* new_array = malloc((length+1) * sizeof(int));
+    for (int i=0; i<length; i++){
+        new_array[i] = array[i];
+    }
+    new_array[length] = element;
+    siftup_max(new_array, length+1, length);
+    free(array);
+    return new_array;
+}
 
 int main(){
 
@@ -127,7 +164,10 @@ int main(){
     max_heapify(array, len);
     print_array(len, array);
 
+    int* new = insert_element(array, len, 1002);
+    print_array(len+1, new);
 
-    free(array);
+
+    free(new);
     return 0;
 }

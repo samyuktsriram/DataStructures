@@ -11,7 +11,6 @@ int* create_array_input(int length){
     }
     return ptr;
 }
-
 int* create_array_rand(int length){
 
     int* ptr = malloc(length * sizeof(int));
@@ -183,7 +182,6 @@ void swapLastMax(int* array, int length){
     swap2(&array[0], &array[length-1]);
     siftdown_max(array, length-2, 0);
 }
-
 
 void heap_sort(int* array, int length){
 
