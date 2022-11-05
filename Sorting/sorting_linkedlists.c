@@ -10,6 +10,19 @@ typedef struct Node {
 }
 Node;
 
+Node* prev(Node* head, Node* end){
+
+    if (head==NULL||end==NULL){return head;}
+    Node* temp = head;
+    //assert head is always before end
+    while (temp->next != end)
+    {
+        temp = temp->next;
+        if (temp->next == NULL) {break;}
+    }
+    return temp;
+}
+
 void print_linkedlist(Node* head){
     Node* temp = NULL;
     printf("Here's your linked list \n");
@@ -104,6 +117,15 @@ void swap2(int* x, int* y){
     *x = temp;
 }
 
+Node* end(Node* head){
+    Node* temp = head;
+    while (temp->next != NULL)
+    {
+        temp = temp->next;
+    }
+    return temp;
+}
+
 void selection_sort_LL(Node* head){
 
     Node* temp;
@@ -122,29 +144,26 @@ void selection_sort_LL(Node* head){
     }
 
 }
+//Fix
+void insertion_sort_LL(Node* head){
 
-Node* end(Node* head){
-    Node* temp = head;
-    while (temp->next != NULL)
-    {
-        temp = temp->next;
+    Node* temp;
+    int current;
+    //Node* end = end(head);
+    Node* dummy = (Node*)malloc(sizeof(Node));
+    dummy->next = head;
+
+    for(temp = head->next; temp!=NULL; temp = temp->next){
+        current = temp->data;
+        while(temp != dummy && current > temp->data){
+            temp->next->next->data = temp->next->data;
+            temp = prev(dummy, temp);
+        }
+        temp->data = current;
     }
-    return temp;
 }
 
-//This is O(n)
-Node* prev(Node* head, Node* end){
 
-    if (head==NULL||end==NULL){return head;}
-    Node* temp = head;
-    //assert head is always before end
-    while (temp->next != end)
-    {
-        temp = temp->next;
-        if (temp->next == NULL) {break;}
-    }
-    return temp;
-}
 
 Node* partition_LL(Node* start, Node* stop){
 
@@ -191,7 +210,8 @@ int main(){
     Node* last = end(head);
     print_linkedlist(head);
     //swap2(&(head->data), &(head->next->next->data));
-    quick_sort_LL(head, last);
+    //quick_sort_LL(head, last);
+    insertion_sort_LL(head);
     
     print_linkedlist(head);
     free_linkedlist(head);

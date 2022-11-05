@@ -20,14 +20,14 @@ void swap2(int* x, int* y){
 
 //Sift_Down method for extraction
 void siftup_max(int* array, int length, int index){
-    if (index > length || index < 0 || (index - 1) / 2 < 0){return;}
+    if (index > length || index <= 0 || (index - 1) / 2 < 0){return;}
 
     int parent = (index - 1) / 2;
 
     int diff1 = array[parent] - array[index];
     if (diff1<0){swap2(&array[parent], &array[index]);}
 
-    siftup_max(array, length, index-1);
+    siftup_max(array, length, ((index-1)/2));
 }
 
 void siftdown_max(int* array, int length, int index){
@@ -149,14 +149,26 @@ int* insert_element(int* array, int length, int element){
     free(array);
     return new_array;
 }
+int extract_element(int* array, int length){
+    //Swap to the end, 
+    //Siftdown root to the right place
+
+    swap2(&array[0], &array[length-1]);
+
+    int temp = array[length-1];
+    siftdown_max(array, length, 0);
+
+    return temp;
+}
+
 
 int main(){
 
     srand(time(NULL));
 
-    int len;
+    int len = 10;
     printf("Enter the length of the array\n");
-    scanf("%d", &len);
+    //scanf("%d", &len);
 
     int* array = create_array_rand(len);
 
@@ -166,6 +178,7 @@ int main(){
 
     int* new = insert_element(array, len, 1002);
     print_array(len+1, new);
+    printf("Here's the max, %d", extract_element(new, len+1));
 
 
     free(new);
