@@ -117,10 +117,10 @@ NodeAddress find_biggest_element(NodeAddress root){
 //Delete
 //INCOMPLETE and strange
 //This function will delete based on NodeAddress, can be written to find a value with the search function.
-//Couple of cases to conside
+//Couple of cases to consider
 NodeAddress delete_element(NodeAddress node, NodeAddress root){
     //Base case
-    if (node == NULL){return root;} //If the value isn't even in the tree we want to do nothing.
+    if (node == NULL){return NULL;} //If the value isn't even in the tree we want to do nothing.
 
     //Case1: No children
     if ((node->left == NULL) && (node->right == NULL)) {free(node); return root;}
@@ -145,17 +145,82 @@ NodeAddress delete_element(NodeAddress node, NodeAddress root){
         //Find the biggest element in the left subtree
         NodeAddress biggest = find_biggest_element(node->left); //node->left must exist bc we've eliminated previous cases.
         NodeAddress dummy = biggest;
-        //call delete_element on it
-        delete_element(biggest, root);
+        
         //connect the grandparent to the found element
         find_parent(node,root)->left = dummy;
         dummy->left = node->left;
         dummy->right = node->right;
+
+        //call delete_element on it
+        delete_element(biggest, root);
+
         free(node);
         return root;
     }
     
 }
+
+//helper function to find predecessor element
+
+NodeAddress find_predecessor(NodeAddress node){
+    //Biggest element in left subtree
+    NodeAddress temp = node;
+    temp = temp->left;
+    while(temp->right != NULL){
+        temp=temp->right;
+    }
+    return temp;
+}
+NodeAddress find_successor(NodeAddress node){
+    NodeAddress temp = node;
+    temp = temp->right;
+    while(temp && temp->left != NULL){
+        temp=temp->left;
+    }
+    return temp;
+}
+
+//This function will delete a value
+//Works, but doesn't work for smallest and biggest value in the tree? how
+//Based on this link: https://www.codewithharry.com/videos/data-structures-and-algorithms-in-hindi-78/
+//https://www.geeksforgeeks.org/deletion-in-binary-search-tree/
+NodeAddress delete_element2(NodeAddress root, int value){
+    if (root == NULL){return NULL;}
+
+    //Now we find the value and call delete on the appropriate child tree
+    if (value < root->val){delete_element2(root->left, value);}
+    else if (value > root->val){delete_element2(root->right, value);}
+
+    //Only reaches here once we've found the element. Algo:
+    //Find inorder predecessor (biggest element in left subtree)
+    //Swap values ipre and root-> val
+    //Delete ipre's val from the left subtree recursively
+    else {
+
+        //Cases based on children
+        //if ((root->left == NULL && root->right == NULL)){free(root);return NULL;}
+
+        //These 2 return temp to connect back to parent. if it is NULL it behaves like the above code
+        if (root->left == NULL){
+            NodeAddress temp = root->right;
+            free(root);
+            return temp;
+        }
+
+        else if (root->right == NULL){
+            NodeAddress temp = root->left;
+            free(root);
+            return temp;
+        }
+        else{
+            NodeAddress succ = find_successor(root);
+            root->val = succ->val;
+            root->right = delete_element2(root->right, succ->val);
+        }
+    }
+    return root;
+}
+
 
 int main(){
     int length;
@@ -183,9 +248,9 @@ int main(){
     printf("%d\n", find_biggest_element(root)->val);
 
 
-    dummy = delete_element(search(2,root), root);
+    dummy = delete_element2(root, 1);
 
-    print_inorder(root);
+    print_inorder(dummy);
     printf("\n");
 
     return 0;

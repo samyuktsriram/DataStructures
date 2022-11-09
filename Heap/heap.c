@@ -131,8 +131,6 @@ int* create_heap_input(int length){
     }
     return ptr;
 }
-
-
 int* insert_element(int* array, int length, int element){
 
     //Copy the array into bigger memory space,
