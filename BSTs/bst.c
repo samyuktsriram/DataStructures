@@ -184,11 +184,16 @@ NodeAddress find_successor(NodeAddress node){
 //Works, but doesn't work for smallest and biggest value in the tree? how
 //Based on this link: https://www.codewithharry.com/videos/data-structures-and-algorithms-in-hindi-78/
 //https://www.geeksforgeeks.org/deletion-in-binary-search-tree/
+
+//Print statement debugging
+
+//So there's some weird behaviour here. It cannot delete the smallest element of the largest element in the tree.
 NodeAddress delete_element2(NodeAddress root, int value){
     if (root == NULL){return NULL;}
 
     //Now we find the value and call delete on the appropriate child tree
     if (value < root->val){delete_element2(root->left, value);}
+    
     else if (value > root->val){delete_element2(root->right, value);}
 
     //Only reaches here once we've found the element. Algo:
@@ -198,25 +203,27 @@ NodeAddress delete_element2(NodeAddress root, int value){
     else {
 
         //Cases based on children
-        //if ((root->left == NULL && root->right == NULL)){free(root);return NULL;}
+        //if ((root->left == NULL && root->right == NULL)){free(root);printf("This WORKS!");return NULL;}
 
         //These 2 return temp to connect back to parent. if it is NULL it behaves like the above code
         if (root->left == NULL){
             NodeAddress temp = root->right;
             free(root);
+            printf("Left Null deletion");
             return temp;
         }
 
         else if (root->right == NULL){
             NodeAddress temp = root->left;
             free(root);
+            printf("Right NULL deletion");
             return temp;
         }
-        else{
-            NodeAddress succ = find_successor(root);
-            root->val = succ->val;
-            root->right = delete_element2(root->right, succ->val);
-        }
+        
+        NodeAddress succ = find_successor(root);
+        root->val = succ->val;
+        root->right = delete_element2(root->right, succ->val);
+        
     }
     return root;
 }
@@ -224,7 +231,7 @@ NodeAddress delete_element2(NodeAddress root, int value){
 
 int main(){
     int length;
-    printf("Enter the number elements \n");
+    printf("Enter the number of elements \n");
     scanf("%d", &length);
 
     NodeAddress root;
@@ -234,9 +241,15 @@ int main(){
 
     //print_inorder(search(7, root));
     NodeAddress dummy;
+    dummy = insert_element(7, root);
     dummy = insert_element(4, root);
-    dummy = insert_element(4, root);
+    dummy = insert_element(10, root);
+    dummy = insert_element(2, root);
+    dummy = insert_element(20, root);
+    dummy = insert_element(19, root);
     dummy = insert_element(400, root);
+    dummy = insert_element(8, root);
+    dummy = insert_element(6, root);
 
     print_inorder(root);
     printf("\n");
@@ -244,13 +257,13 @@ int main(){
 
     //Testing helper functions
     //printf("%d\n", search(3,root)?(search(3,root)->val): NULL);
-    printf("%d\n", find_parent(search(400,root), root)->val);
-    printf("%d\n", find_biggest_element(root)->val);
+    //printf("%d\n", find_parent(search(400,root), root)->val);
+    //printf("%d\n", find_biggest_element(root)->val);
 
 
-    dummy = delete_element2(root, 1);
+    dummy = delete_element2(root, 10);
 
-    print_inorder(dummy);
+    print_inorder(root);
     printf("\n");
 
     return 0;
