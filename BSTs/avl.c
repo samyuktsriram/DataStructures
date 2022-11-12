@@ -69,8 +69,15 @@ int max_int(int x, int y){
 
 void height_balance_update(NodeAddress node){
 
-    //This will only be called on non leaves
-    assert((node->left!=NULL) || (node->right!=NULL));
+    //This will only be called on non leaves, turns out that's not true
+
+    if (node->left == NULL && node->right == NULL){
+        node->height = 0;
+        node->balance = 0;
+        return;
+    }
+
+    //assert((node->left!=NULL) || (node->right!=NULL));
 
     if (node->left == NULL){
         node->height = node->right->height + 1;
@@ -88,66 +95,67 @@ void height_balance_update(NodeAddress node){
 }
 
 //https://www.programiz.com/dsa/avl-tree#:~:text=Balance%20factor%20of%20a%20node,right%20subtree%20of%20that%20node.&text=The%20self%20balancing%20property%20of,1%2C%200%20or%20%2B1.
-void left_rotate(NodeAddress node){
-
-//HAVE TO FIX CASES WHERE THERE ARE NO CHILDREN
+NodeAddress left_rotate(NodeAddress node){
 
     NodeAddress help_right = node->right;
-    //NodeAddress help_node = node;
+    NodeAddress T2 = help_right->left;
+    NodeAddress root = node->parent;
 
-    if (node->right->left != NULL){
-        node->right = node->right->left;
-        help_right->left->parent = node;
-    }
+    //Make help_right point to node
+    //make node->right point to help_left
 
     help_right->parent = node->parent;
-    
-    if (node->parent != NULL){
-        if (node->parent->left == node){
-        node->parent->left = help_right;
-        }
-        else {node->parent->right = help_right;}
-    }
 
-    
     help_right->left = node;
     node->parent = help_right;
+
+    node->right = T2;
+    if (T2 != NULL){T2->parent = node;}
+    
+    if (root != NULL){
+        if (root->left == node){
+        root->left = help_right;
+        }
+        else {root->right = help_right;}
+    }
 
     //Just going to call rebalance on these guys again, because it will update the heights as needed
     //Then call appropriate_shift, but that won't do anything because the balances will be fine.
     //Could have to fix this later
     height_balance_update(node);
     height_balance_update(help_right);
+    return help_right;
 }
-void right_rotate(NodeAddress node){
-
-//HAVE TO FIX CASES WHERE THERE ARE NO CHILDREN
+NodeAddress right_rotate(NodeAddress node){
 
     NodeAddress help_left = node->left;
-    //NodeAddress help_node = node;
+    NodeAddress T2 = help_left->right;
+    NodeAddress root = node->parent;
 
-    if (node->left->right != NULL){
-        node->left = node->left->right;
-        help_left->right->parent = node;
-    }
+    //Make help_right point to node
+    //make node->right point to help_left
 
     help_left->parent = node->parent;
-    
-    if (node->parent != NULL){
-        if (node->parent->left == node){
-        node->parent->left = help_left;
-        }
-        else {node->parent->right = help_left;}
-    }
 
     help_left->right = node;
     node->parent = help_left;
 
+    node->left = T2;
+    if (T2 != NULL){T2->parent = node;}
+    
+    if (root != NULL){
+        if (root->left == node){
+        root->left = help_left;
+        }
+        else {root->right = help_left;}
+    }
+
     //Just going to call rebalance on these guys again, because it will update the heights as needed
     //Then call appropriate_shift, but that won't do anything because the balances will be fine.
-    //Could have to fix this later, could manually calculate the height changes
+    //Could have to fix this later
     height_balance_update(node);
     height_balance_update(help_left);
+    return help_left;
 }
 
 void appropriate_shift(NodeAddress node){
@@ -165,23 +173,26 @@ void appropriate_shift(NodeAddress node){
 
 
     //This is not keeping base cases in mind. Be careful.
-    assert((node->left!=NULL) || (node->right!=NULL));
+    if ((node->left==NULL) && (node->right==NULL)){return;}
+    //assert((node->left!=NULL) || (node->right!=NULL));
 
     //There's an implicit bit of math here: parent will only be unbalanced if children have a non zero balance.
     if (node->balance<-1 || node->balance>1){
-
-        if ((node->right!=NULL) && (node->balance == -2 && node->right->balance == -1)){
+        //Unsure whether these not null conditions are causing a problem.
+        if ((node->right!=NULL) && (node->balance<-1 && node->right->balance == -1)){
             left_rotate(node);
         }
-        else if ((node->right!=NULL) && (node->balance == 2 && node->right->balance == 1)){
+        else if ((node->right!=NULL) && (node->balance>1 && node->left->balance == 1)){
             right_rotate(node);
         }
-        else if ((node->left!=NULL) && (node->balance == -2 && node->left->balance==1)){
-            right_rotate(node->right);
+        else if ((node->right!=NULL) && (node->balance < -1 && node->right->balance==1)){
+            node->right = right_rotate(node->right);
+            //you need to connect these nodes here
             left_rotate(node);
         }
-        else if ((node->right!=NULL) && (node->balance == 2 && node->left->balance==-1)){
-            left_rotate(node->left);
+        else if ((node->right!=NULL) && (node->balance > 1 && node->left->balance==-1)){
+            node->left = left_rotate(node->left);
+            //You need to connect the nodes here
             right_rotate(node);
         }
     }
@@ -199,7 +210,9 @@ void rebalance(NodeAddress node){
     while (node!=NULL){
         height_balance_update(node);
         appropriate_shift(node);
+        assert(node->balance>=-1 && node->balance<=1);
         node = node->parent;
+        rebalance(node);
     }
 }
 
@@ -235,15 +248,16 @@ NodeAddress create_avl(int count){
                         temp->left = helper;
                         helper->parent = temp;
                         //This updates all the heights. We call rebalance here at each stage
-                        while(temp!=NULL){
+                        while(helper!=NULL){
                             //This height doesn't work, it has to be max of child subtrees. Do it in rebalance.
                             //temp->height +=1;
                             //temp->balance = temp->left->height - temp->right->height
                             //Since we know we are adding to temp->left, we can just +1 to the balance
                             //temp->balance += 1;
-                            rebalance(temp);
-                            assert(temp->balance>=-1 && temp->balance<=1); //&& (BST condition is met))
-                            temp = temp->parent;
+                            rebalance(helper);
+                            assert(helper->balance>=-1 && helper->balance<=1);
+                            //assert(AVL condition is met, BST condition is met)
+                            helper = helper->parent;
                             }
                         break;
                         } else {temp = temp->left;} //the while loop continues
@@ -252,13 +266,13 @@ NodeAddress create_avl(int count){
                     if (temp->right == NULL){
                         temp->right = helper;
                         helper->parent = temp;
-                        while (temp!=NULL){
+                        while (helper!=NULL){
                             //temp->height +=1;
                             //temp->balance -= 1;
-                            rebalance(temp);
-                            assert(temp->balance>=-1 && temp->balance<=1);
+                            rebalance(helper);
+                            assert(helper->balance>=-1 && helper->balance<=1);
                             //assert(AVL condition is met, BST condition is met)
-                            temp = temp->parent;
+                            helper = helper->parent;
                         }
                         break;
                     } else {temp = temp->right;}
@@ -267,6 +281,7 @@ NodeAddress create_avl(int count){
             }
         }
     }
+    //For some reason, this isn't the root? Check it out
     return root;
 }
 
@@ -274,7 +289,7 @@ NodeAddress create_avl(int count){
 void print_inorder_heights(NodeAddress root){
     if (root != NULL){ //Base case checking
         print_inorder_heights(root->left);
-        printf("%d, height: %d\n", root->val, root->height);
+        printf("%d, balance: %d\n", root->val, root->balance);
         print_inorder_heights(root->right);
     }
 }
