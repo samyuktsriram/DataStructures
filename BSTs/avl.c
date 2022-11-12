@@ -107,9 +107,8 @@ NodeAddress left_rotate(NodeAddress node){
     
 
     help_right->left = node;
-    
-
     node->right = T2;
+
     if (T2 != NULL){T2->parent = node;}
     
     if (root != NULL){
@@ -123,7 +122,7 @@ NodeAddress left_rotate(NodeAddress node){
 
     //Just going to call rebalance on these guys again, because it will update the heights as needed
     //Then call appropriate_shift, but that won't do anything because the balances will be fine.
-    //Could have to fix this later
+    //Could have to fix this later - fixed
     height_balance_update(node);
     height_balance_update(help_right);
     return help_right;
@@ -156,7 +155,7 @@ NodeAddress right_rotate(NodeAddress node){
 
     //Just going to call rebalance on these guys again, because it will update the heights as needed
     //Then call appropriate_shift, but that won't do anything because the balances will be fine.
-    //Could have to fix this later
+    //Could have to fix this later - fixed
     height_balance_update(node);
     height_balance_update(help_left);
     return help_left;
