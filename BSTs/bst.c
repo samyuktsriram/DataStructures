@@ -4,6 +4,7 @@
 
 #include<stdio.h>
 #include<stdlib.h>
+#include<assert.h>
 
 struct nodeType {
     int val;
@@ -172,9 +173,11 @@ NodeAddress find_predecessor(NodeAddress node){
     return temp;
 }
 NodeAddress find_successor(NodeAddress node){
+
+    //Finds the successor element in the tree. Smallest element in the right subtree
     NodeAddress temp = node;
     temp = temp->right;
-    while(temp && temp->left != NULL){
+    while(temp->left != NULL){
         temp=temp->left;
     }
     return temp;
@@ -189,7 +192,7 @@ NodeAddress find_successor(NodeAddress node){
 
 //So there's some weird behaviour here. It cannot delete the smallest element of the largest element in the tree.
 NodeAddress delete_element2(NodeAddress root, int value){
-    if (root == NULL){return NULL;}
+    if (root == NULL){return root;}
 
     //Now we find the value and call delete on the appropriate child tree
     if (value < root->val){delete_element2(root->left, value);}
@@ -241,17 +244,17 @@ int main(){
 
     //print_inorder(search(7, root));
     NodeAddress dummy;
-    dummy = insert_element(7, root);
-    dummy = insert_element(4, root);
-    dummy = insert_element(10, root);
-    dummy = insert_element(2, root);
-    dummy = insert_element(20, root);
-    dummy = insert_element(19, root);
-    dummy = insert_element(400, root);
-    dummy = insert_element(8, root);
-    dummy = insert_element(6, root);
+    dummy = insert_element(50, dummy);
+    dummy = insert_element(30, dummy);
+    dummy = insert_element(20, dummy);
+    dummy = insert_element(40, dummy);
+    dummy = insert_element(70, dummy);
+    dummy = insert_element(60, dummy);
+    dummy = insert_element(80, dummy);
+    //dummy = insert_element(8, root);
+    //dummy = insert_element(6, root);
 
-    print_inorder(root);
+    print_inorder(dummy);
     printf("\n");
 
 
@@ -261,9 +264,9 @@ int main(){
     //printf("%d\n", find_biggest_element(root)->val);
 
 
-    dummy = delete_element2(root, 10);
+    dummy = delete_element2(dummy, 20);
 
-    print_inorder(root);
+    print_inorder(dummy);
     printf("\n");
 
     return 0;
