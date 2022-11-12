@@ -31,8 +31,6 @@ NodeAddress create_bst(int count){
         //INV: All elements to the left of temp are smaller or equal, all elements to the right are greater.
         else {
             temp = root;
-            //printf("Enter the element to add");
-            //scanf("%d", &temp->val);
 
             //Check where to add, you'll need to use a while loop and break out when you find a null spot
             //Finding the right place
