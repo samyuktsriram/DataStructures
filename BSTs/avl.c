@@ -104,10 +104,10 @@ NodeAddress left_rotate(NodeAddress node){
     //Make help_right point to node
     //make node->right point to help_left
 
-    help_right->parent = node->parent;
+    
 
     help_right->left = node;
-    node->parent = help_right;
+    
 
     node->right = T2;
     if (T2 != NULL){T2->parent = node;}
@@ -118,6 +118,8 @@ NodeAddress left_rotate(NodeAddress node){
         }
         else {root->right = help_right;}
     }
+    help_right->parent = node->parent;
+    node->parent = help_right;
 
     //Just going to call rebalance on these guys again, because it will update the heights as needed
     //Then call appropriate_shift, but that won't do anything because the balances will be fine.
@@ -135,10 +137,10 @@ NodeAddress right_rotate(NodeAddress node){
     //Make help_right point to node
     //make node->right point to help_left
 
-    help_left->parent = node->parent;
+    
 
     help_left->right = node;
-    node->parent = help_left;
+    
 
     node->left = T2;
     if (T2 != NULL){T2->parent = node;}
@@ -149,6 +151,8 @@ NodeAddress right_rotate(NodeAddress node){
         }
         else {root->right = help_left;}
     }
+    help_left->parent = node->parent;
+    node->parent = help_left;
 
     //Just going to call rebalance on these guys again, because it will update the heights as needed
     //Then call appropriate_shift, but that won't do anything because the balances will be fine.
@@ -179,21 +183,21 @@ void appropriate_shift(NodeAddress node){
     //There's an implicit bit of math here: parent will only be unbalanced if children have a non zero balance.
     if (node->balance<-1 || node->balance>1){
         //Unsure whether these not null conditions are causing a problem.
-        if ((node->right!=NULL) && (node->balance<-1 && node->right->balance == -1)){
-            left_rotate(node);
-        }
-        else if ((node->right!=NULL) && (node->balance>1 && node->left->balance == 1)){
-            right_rotate(node);
-        }
-        else if ((node->right!=NULL) && (node->balance < -1 && node->right->balance==1)){
+        if ((node->right!=NULL) && (node->balance < -1 && node->right->balance==1)){
             node->right = right_rotate(node->right);
             //you need to connect these nodes here
             left_rotate(node);
         }
-        else if ((node->right!=NULL) && (node->balance > 1 && node->left->balance==-1)){
+        else if ((node->left!=NULL) && (node->balance > 1 && node->left->balance==-1)){
             node->left = left_rotate(node->left);
             //You need to connect the nodes here
             right_rotate(node);
+        }
+        else if ((node->balance<-1)){
+            left_rotate(node); //maybe this isn't needed
+        }
+        else if (node->balance>1){
+            right_rotate(node); //maybe reasigning to node isn't needed.
         }
     }
 }
@@ -282,6 +286,10 @@ NodeAddress create_avl(int count){
         }
     }
     //For some reason, this isn't the root? Check it out
+    while (root->parent != NULL){
+        root = root->parent;
+    }
+    rebalance(root);
     return root;
 }
 
@@ -294,8 +302,24 @@ void print_inorder_heights(NodeAddress root){
     }
 }
 
+NodeAddress search(int val, NodeAddress node){
+    if (node==NULL){return NULL;}
+    if (val == node->val){return node;}
+    else if (val <= node->val){return search(val, node->left);}
+    else // (val > node->val) This doesn't get checked i guess
+    {return search(val, node->right);}
+}
+void print_up(NodeAddress node){
+    while (node!=NULL){
+        printf("%d, height: %d\n", node->val, node->height);
+        node = node->parent;
+    }
+}
 
 int main(){
+
+//So this doesn't work specifically when 4 elements are added in a row that are uniformly increasing. 
+//The AVL Condition is maintained, but the BST condition is not.
 
     int length;
     printf("Enter the number of elements \n");
@@ -303,6 +327,11 @@ int main(){
 
     NodeAddress root;
     root = create_avl(length);
+
+    print_up(search(10, root));
+    print_up(search(1, root));
+    printf("\n");printf("\n");
+
     print_inorder_heights(root);
     printf("\n");
 
