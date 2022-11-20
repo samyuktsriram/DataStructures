@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <time.h>
 
+//There are some problems with siftdown. 
+
 void swap2(int* x, int* y){
     int temp = *y;
     *y = *x;
@@ -55,7 +57,7 @@ void siftdown_max(int* array, int length, int index){
 
     if (child2<= length && child1 > length){
         int diff2 = array[index] - array[child2];
-        if (diff2<0){swap2(&array[index], &array[child1]);}
+        if (diff2<0){swap2(&array[index], &array[child2]);}
     }
 
     siftdown_max(array, length, child1);
