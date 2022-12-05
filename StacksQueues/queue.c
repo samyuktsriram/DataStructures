@@ -48,7 +48,6 @@ QueueAddress create_queue(){
 
 QueueAddress insert_queue(QueueAddress q, int val){
 
-//EDITT
     //We only want positive values
     assert(val >= 0);
 
