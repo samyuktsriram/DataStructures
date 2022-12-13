@@ -209,7 +209,7 @@ char* search_hashtable(ht* ht, char* key){
     int index = hash_function_basic(key);
 
     if (ht->items[index] == NULL){
-        printf("This key doesn't exist in the table.");
+        printf("This key doesn't exist in the table.\n");
         return NULL;
     }
 
@@ -221,15 +221,16 @@ char* search_hashtable(ht* ht, char* key){
     else {//They share indexes, so the required key must be in the overflow buckets, and the buckets must exist. REVIEW
         if (ht->overflow[index] != NULL){
             LinkedList* temp = ht->overflow[index];
-            while (temp->next != NULL){
-                if (strcmp(ht->items[index]->key, key)==0){
+
+            while (temp != NULL){
+                if (strcmp(temp->item->key, key)==0){
                     printf("Found the element in overflow!\n");
                     printf("Key: %s, Value: %s, \n", temp->item->key, temp->item->value);
                     return temp->item->value;
                 }
                 temp = temp->next;
             }
-            printf("This key doesn't exist in the table, overflows checked");
+            printf("This key doesn't exist in the table, overflows checked\n");
             return NULL;
         }
     }
@@ -237,7 +238,68 @@ char* search_hashtable(ht* ht, char* key){
 
 void delete_element(ht* ht, char* key){
     
+    //Can copy from the search function and alter where needed.
+    //Cases:
+        /*
+        1. if the index is empty, the key is not there so move on
+        2. if index is there but key is not, it must be in overflow chain
+            1. if the head of the chain is the element to delete, reattach head->next to ht->overflow[index] and delete head
+            2. if it's not the head, look through the rest of teh chain and delete it, attach the previous to the next.
+        */
+
+    int index = hash_function_basic(key);
+    ht_item* temp_item = ht->items[index];
+    LinkedList* overflow_head = ht->overflow[index];
+
+    if (ht->items[index] == NULL){
+        printf("This key doesn't exist in the table, cannot delete.");
+        return;
+    }
+
+    if (overflow_head == NULL && strcmp(ht->items[index]->key, key)==0){ //Empty overflows, matching index and key
+        printf("Found the element!, Deleting\n");
+        ht->items[index] = NULL;
+        free_item(temp_item);
+        return;
+    }
+    else if (overflow_head != NULL) {
+        if (strcmp(overflow_head->item->key, key) == 0){
+            printf("Found the element as overflow_head!, Deleting\n");
+            ht->overflow[index] = overflow_head->next;
+            free_item(overflow_head->item);
+            free(overflow_head);
+            ht->count--;
+            return;
+        }
+        else if (strcmp(ht->items[index]->key, key)){
+            //delete item and put first element from overflow chain in here.
+            printf("Found the element in table!, Deleting and moving overflow head into table\n");
+            free_item(temp_item);
+            ht->items[index] = create_item(overflow_head->item->key, overflow_head->item->value);
+            ht->overflow[index] = overflow_head->next;
+            ht->count--;
+            return;
+        }
+        else { // case where it's somewhere in the chain, after the head
+
+            LinkedList* current = overflow_head->next;
+            LinkedList* prev = overflow_head;
+            while (current != NULL){
+                if (strcmp(current->item->key, key)==0){
+                    printf("Found the element in overflows!, Deleting\n");
+                    prev->next = current->next;
+                    free_item(current->item);
+                    free(current);
+                    ht->count--;
+                    return;
+                }
+                prev = current;
+                current = current->next;
+            }
+        }
+    }
 }
+
 
 int main(){
 
@@ -252,8 +314,9 @@ int main(){
 
     search_hashtable(hashtable, "Potato");
     search_hashtable(hashtable, "Hel");
+    delete_element(hashtable, "Hel");
     print_hashtable(hashtable);
-    free_hashtable(hashtable);
+    //free_hashtable(hashtable);
     return 0;
 }
 
