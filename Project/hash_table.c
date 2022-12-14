@@ -2,8 +2,9 @@
 
 /* Following the broad structure of the reference, but doing a few things differently:
 1. Implementing a more complex hash function
-2. More comprehensive testing protocol
-3. Where possible, I'm including time and space complexity calculations / comments about what I think can be done better
+2. Table doubling
+3. More comprehensive testing protocol
+4. Where possible, I'm including time and space complexity calculations / comments about what I think can be done better
 
 I'm writing each function myself based on the reference.
 */
@@ -15,7 +16,7 @@ I'm writing each function myself based on the reference.
 #include <string.h> //String comparison and manipulation commands
 
 
-#define CAPACITY 1000 // Starting small to see if table doubling is possible
+unsigned long CAPACITY = 1000; // Starting small to see if table doubling is possible
 
 unsigned long hash_function_basic(char* string){
     unsigned long sum = 0;
@@ -53,13 +54,18 @@ struct ht {
 typedef struct ht ht;
 
 // Functions to support
-//1. Create and free
-
-
+/*
+1. Create and free
+2. Insert
+3. Search
+4. Delete
+5. Print
+*/
 ht* create_hashtable(int size){
     ht* ht = malloc(sizeof(ht));
     ht->size = size;
     ht->items = (ht_item**) calloc(ht->size, sizeof(ht_item*)); //creates the array of pointers
+    ht->count = 0;
     
     //initializing all the pointers to NULL
     for(int i = 0; i<ht->size;i++){
@@ -74,6 +80,7 @@ ht* create_hashtable(int size){
     ht->overflow = buckets;
 
     return ht;
+    //O(n) time -> n+n, O(n) space -> n+n
 }
 
 
@@ -94,6 +101,7 @@ ht_item* create_item(char* key, char* value){
     strcpy(item->value, value);
 
     return item;
+    //O(n) time, bc we're copying 2 strings using strcpy
 }
 
 //Free functions
@@ -160,7 +168,12 @@ void ht_insert(ht* ht, char* key, char* value){
 
     if(ht->count == ht->size){
         printf("This table is full \n");
-        //table doubling feature
+        ht->items = realloc(ht->items, 2*ht->size);
+        ht->overflow = realloc(ht->overflow, 2*ht->size);
+        ht->size = 2*ht->size;
+        printf("Reallocated to %d\n", ht->size);
+        //So this doubles the table, but the hashing still is based on the old value. That's why overflows are there.
+        CAPACITY = CAPACITY*2;
         return;
     }
 
@@ -218,7 +231,7 @@ char* search_hashtable(ht* ht, char* key){
         printf("Key: %s, Value: %s, Index: %d \n", ht->items[index]->key, ht->items[index]->value, index);
         return ht->items[index]->value;
     }
-    else {//They share indexes, so the required key must be in the overflow buckets, and the buckets must exist. REVIEW
+    else {//They share indexes, so the required key must be in the overflow buckets, and the buckets must exist.
         if (ht->overflow[index] != NULL){
             LinkedList* temp = ht->overflow[index];
 
@@ -271,7 +284,7 @@ void delete_element(ht* ht, char* key){
             ht->count--;
             return;
         }
-        else if (strcmp(ht->items[index]->key, key)){
+        else if (strcmp(ht->items[index]->key, key)==0){
             //delete item and put first element from overflow chain in here.
             printf("Found the element in table!, Deleting and moving overflow head into table\n");
             free_item(temp_item);
@@ -301,6 +314,27 @@ void delete_element(ht* ht, char* key){
 }
 
 
+//Additional Testing routines
+
+//https://stackoverflow.com/questions/8257714/how-to-convert-an-int-to-string-in-c
+char* int_to_string(int n){
+    int x = n;
+    int length = snprintf(NULL, 0, "%d", x);
+    char* str = malloc(length + 1);
+    snprintf(str, length + 1, "%d", x);
+    return str;
+}
+
+void size_test(ht* ht){
+    int size_max = 2000; // testing capacity was 500
+    for (int j=0; j<size_max+20; j++){
+        ht_insert(ht, int_to_string(j), "");
+        //printf("Count: %d", ht->count);
+    }
+    //print_hashtable(ht);
+}
+
+
 int main(){
 
     ht* hashtable = create_hashtable(CAPACITY);
@@ -310,12 +344,17 @@ int main(){
     //"Cau" and "Hel" have the same index when hashed with hash_function_basic()
     ht_insert(hashtable, "Cau", "Crash 1");
     ht_insert(hashtable, "Hel", "Crash 2");
+    ht_insert(hashtable, "Hdm", "Crash 3");
 
 
     search_hashtable(hashtable, "Potato");
     search_hashtable(hashtable, "Hel");
-    delete_element(hashtable, "Hel");
+    delete_element(hashtable, "Hdm");
     print_hashtable(hashtable);
+
+    ht* ht = create_hashtable(CAPACITY);
+    size_test(ht);
+
     //free_hashtable(hashtable);
     return 0;
 }
