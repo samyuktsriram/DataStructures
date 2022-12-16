@@ -16,8 +16,7 @@ I'm writing each function myself based on the reference.
 #include <string.h> //String comparison and manipulation commands
 
 
-int CAPACITY = 4000; // Starting small to see if table doubling is possible
-//Optimal performance with a prime number for capacity -> prevents 
+int CAPACITY = 10000; // Starting small to see if table doubling is possible
 
 int hash_function_basic(char* string){
     unsigned long sum = 0;
@@ -28,15 +27,15 @@ int hash_function_basic(char* string){
 }
 
 //https://stackoverflow.com/questions/7666509/hash-function-for-string
+//http://www.cse.yorku.ca/~oz/hash.html
+//Modified to fit the reqiurements. Unclear on exactly what's going on here, but some bit manipulation on an integer and addition based on a given string
 int hash_function_complex(char *str)
 {
     int hash = 5381;
     int c;
-
-    while (c == *str++)
+    while (c = *str++)
         hash = ((hash << 5) + hash) + c; /* hash * 33 + c */
-
-    return hash;
+    return abs(hash % CAPACITY);
 }
 
 
@@ -58,12 +57,12 @@ typedef struct LinkedList LinkedList;
 
 struct ht {
     //size is the max size, count is how many elements are in the table
-    //Using separate chaining to create overflow buckets -> first testing without
+    //Using separate chaining to create overflow buckets
 
     int size;
     int count;
     ht_item** items; //This is an array of pointers, that each point to each item in the hash table
-    LinkedList** overflow; //again, an array of pointers that correspond to each item for its overflow? CHECK AGAIN
+    LinkedList** overflow; //again, an array of pointers that correspond to each item for its overflow
 };
 typedef struct ht ht;
 
@@ -282,7 +281,7 @@ void delete_element(ht* ht, char* key, int (*hashfun) (char*)){
     }
 
     if (overflow_head == NULL && strcmp(ht->items[index]->key, key)==0){ //Empty overflows, matching index and key
-        printf("Found the element!, Deleting\n");
+        printf("Found the element!, Deleting %s\n",ht->items[index]->key);
         ht->items[index] = NULL;
         free_item(temp_item);
         return;
@@ -342,32 +341,38 @@ char* int_to_string(int n){
 void size_test(ht* ht){
     int size_max = ht->size; // testing capacity was 500
     for (int j=0; j<size_max+2; j++){
-        ht_insert(ht, int_to_string(j), "Testing", hash_function_complex);
+        ht_insert(ht, int_to_string(j), "Testing", hash_function_basic);
         //printf("Count: %d", ht->count);
     }
     //print_hashtable(ht);
 }
 
-void insert_test(ht* ht){
-    ht_insert(ht, "Potato", "Delicious", hash_function_basic);
-    ht_insert(ht, "second entry", "banana", hash_function_basic);
+void insert_test(ht* ht, int (*hashfun) (char*)){
+    ht_insert(ht, "Potato", "Delicious", (*hashfun));
+    ht_insert(ht, "second entry", "banana", (*hashfun));
 
     //"Cau" and "Hel" have the same index when hashed with hash_function_basic()
-    ht_insert(ht, "Cau", "Crash 1", hash_function_basic);
-    ht_insert(ht, "Hel", "Crash 2", hash_function_basic);
-    ht_insert(ht, "Hdm", "Crash 3", hash_function_basic);
-    ht_insert(ht, "Cau", "This is the replaced element, success!", hash_function_basic);
+    ht_insert(ht, "Cau", "Crash 1", (*hashfun));
+    ht_insert(ht, "Hel", "Crash 2", (*hashfun));
+    ht_insert(ht, "Hdm", "Crash 3", (*hashfun));
+    ht_insert(ht, "Cau", "This is the replaced element, success!", (*hashfun));
+    print_hashtable(ht);
 
-    search_hashtable(ht, "Potato", hash_function_basic);
-    search_hashtable(ht, "Hel", hash_function_basic);
+    printf("Searching Test \n");
+    search_hashtable(ht, "Potato", (*hashfun));
+    search_hashtable(ht, "Hel", (*hashfun));
 }
 
-void insert_delete_test(ht* hashtable){
-    insert_test(hashtable);
-    delete_element(hashtable, "Bbu",hash_function_basic);
-    //delete_element(hashtable, "Cau", hash_function_basic);
-    delete_element(hashtable, "Hdm",hash_function_basic);
-    //delete_element(hashtable, "Hel",hash_function_basic);
+void insert_delete_test(ht* hashtable, int (*hashfun) (char*)){
+
+    printf("==============================\n This test will add elements according to the testing specification \n based on the uncommented elements below, deletion for all cases can be checked. Search is also tested with insert.\n==================================\n");
+
+    insert_test(hashtable, (*hashfun));
+    delete_element(hashtable, "Bbu",(*hashfun));
+    //delete_element(hashtable, "Cau", (*hashfun));
+    delete_element(hashtable, "Hdm", (*hashfun));
+    //delete_element(hashtable, "Hel",(*hashfun));
+    print_hashtable(hashtable);
 }
 
 int main(){
@@ -376,39 +381,18 @@ int main(){
     //insert_test(hashtable);
     //print_hashtable(hashtable);
 
-    insert_delete_test(hashtable);
-    
-    print_hashtable(hashtable);
+    //Using a simple hash function that leads to collisions
+    insert_delete_test(hashtable, hash_function_basic);
+
 
     ht* ht = create_hashtable(CAPACITY);
+
+    //Using a complex refactored hash function, will have no overflow bins
+    insert_delete_test(ht, hash_function_complex);
+
     size_test(ht);
 
-    //free_hashtable(hashtable);
+    free_hashtable(hashtable);
+    free_hashtable(ht);
     return 0;
 }
-
-//Testing modules
-/*
-1. Insert
-    Adding elements over capacity
-        Should return "The table is full"
-    Same key, different value
-        should add and update the value
-    Different key, using overfull box
-2. Search
-    Elements in the table
-        -> in the items slot
-        -> in the overfull slot
-    Elements outside the table
-        returns not found
-3. Delete
-    Elements that are not in the table
-        should return not in the table
-    Elements in the table:
-        ->in items
-        ->head item of overfull chain
-        ->item somewhere in the overfull chain
-        ->different key but same hash value
-4. Hash Function
-    Modify 
-*/
