@@ -1,8 +1,8 @@
 // Reference: https://www.digitalocean.com/community/tutorials/hash-table-in-c-plus-plus#putting-it-all-together
 
 /* Following the broad structure of the reference, but doing a few things differently:
-1. Implementing a more complex hash function
-2. Table doubling
+1. Implementing a more complex hash function -> using function pointers to switch
+2. Table doubling - did not work so commented out
 3. More comprehensive testing protocol
 4. Where possible, I'm including time and space complexity calculations / comments about what I think can be done better
 
@@ -16,15 +16,29 @@ I'm writing each function myself based on the reference.
 #include <string.h> //String comparison and manipulation commands
 
 
-unsigned long CAPACITY = 1000; // Starting small to see if table doubling is possible
+int CAPACITY = 4000; // Starting small to see if table doubling is possible
+//Optimal performance with a prime number for capacity -> prevents 
 
-unsigned long hash_function_basic(char* string){
+int hash_function_basic(char* string){
     unsigned long sum = 0;
     for(int i = 0; string[i] != NULL; i++){
         sum += string[i]; //Just adds all the ascii values, maybe another operation could be interesting
     }
     return sum % CAPACITY; // Prevents creating indexes greater than the size of the table. 
 }
+
+//https://stackoverflow.com/questions/7666509/hash-function-for-string
+int hash_function_complex(char *str)
+{
+    int hash = 5381;
+    int c;
+
+    while (c == *str++)
+        hash = ((hash << 5) + hash) + c; /* hash * 33 + c */
+
+    return hash;
+}
+
 
 //Creating the data structures
 
@@ -157,7 +171,7 @@ void print_hashtable(ht* ht){
     }
 }
 
-void ht_insert(ht* ht, char* key, char* value){
+void ht_insert(ht* ht, char* key, char* value, int (*hashfun) (char*)){
     
     //Check if table is full, possible table doubling feature here
     //Create an index for the key
@@ -168,16 +182,16 @@ void ht_insert(ht* ht, char* key, char* value){
 
     if(ht->count == ht->size){
         printf("This table is full \n");
-        ht->items = realloc(ht->items, 2*ht->size);
-        ht->overflow = realloc(ht->overflow, 2*ht->size);
-        ht->size = 2*ht->size;
-        printf("Reallocated to %d\n", ht->size);
+        //ht->items = realloc(ht->items, 2*ht->size);
+        //ht->overflow = realloc(ht->overflow, 2*ht->size);
+        //ht->size = 2*ht->size;
+        //printf("Reallocated to %d\n", ht->size);
         //So this doubles the table, but the hashing still is based on the old value. That's why overflows are there.
-        CAPACITY = CAPACITY*2;
+        //CAPACITY = CAPACITY*2;
         return;
     }
 
-    int index = hash_function_basic(key);
+    int index = (*hashfun)(key);
 
     if(ht->items[index] == NULL){
         ht->items[index] = create_item(key, value);
@@ -185,8 +199,6 @@ void ht_insert(ht* ht, char* key, char* value){
         return;
     }
     else {
-
-
         if (strcmp(key, ht->items[index]->key) == 0){ //If the key is the same, we update the value
             free(ht->items[index]->value);
             ht->items[index]->value = (char*) calloc (strlen(value)+1, sizeof(char));
@@ -218,8 +230,8 @@ void ht_insert(ht* ht, char* key, char* value){
     }
 }
 
-char* search_hashtable(ht* ht, char* key){
-    int index = hash_function_basic(key);
+char* search_hashtable(ht* ht, char* key, int (*hashfun) (char*)){
+    int index = (*hashfun)(key);
 
     if (ht->items[index] == NULL){
         printf("This key doesn't exist in the table.\n");
@@ -249,7 +261,7 @@ char* search_hashtable(ht* ht, char* key){
     }
 }
 
-void delete_element(ht* ht, char* key){
+void delete_element(ht* ht, char* key, int (*hashfun) (char*)){
     
     //Can copy from the search function and alter where needed.
     //Cases:
@@ -260,7 +272,7 @@ void delete_element(ht* ht, char* key){
             2. if it's not the head, look through the rest of teh chain and delete it, attach the previous to the next.
         */
 
-    int index = hash_function_basic(key);
+    int index = (*hashfun)(key);
     ht_item* temp_item = ht->items[index];
     LinkedList* overflow_head = ht->overflow[index];
 
@@ -309,6 +321,8 @@ void delete_element(ht* ht, char* key){
                 prev = current;
                 current = current->next;
             }
+            //The index was generated, but the the key didn't get matched in the search
+            printf("The index exists, but the key does not exist \n");
         }
     }
 }
@@ -326,36 +340,80 @@ char* int_to_string(int n){
 }
 
 void size_test(ht* ht){
-    int size_max = 2000; // testing capacity was 500
-    for (int j=0; j<size_max+20; j++){
-        ht_insert(ht, int_to_string(j), "");
+    int size_max = ht->size; // testing capacity was 500
+    for (int j=0; j<size_max+2; j++){
+        ht_insert(ht, int_to_string(j), "Testing", hash_function_complex);
         //printf("Count: %d", ht->count);
     }
     //print_hashtable(ht);
 }
+void insert_key_test(ht* ht){
+    //This assumes the table is full with indexes:
+    ht_insert(ht, int_to_string(30), "This is the replaced element, success!", hash_function_complex);
+    search_hashtable(ht, int_to_string(30), hash_function_complex);
+}
 
+void insert_test(ht* ht){
+    ht_insert(ht, "Potato", "Delicious", hash_function_basic);
+    ht_insert(ht, "second entry", "banana", hash_function_basic);
+
+    //"Cau" and "Hel" have the same index when hashed with hash_function_basic()
+    ht_insert(ht, "Cau", "Crash 1", hash_function_basic);
+    ht_insert(ht, "Hel", "Crash 2", hash_function_basic);
+    ht_insert(ht, "Hdm", "Crash 3", hash_function_basic);
+
+    search_hashtable(ht, "Potato", hash_function_basic);
+    search_hashtable(ht, "Hel", hash_function_basic);
+}
+
+void delete_test(ht* hashtable){
+    insert_test(hashtable);
+    delete_element(hashtable, "Bbu",hash_function_basic);
+    delete_element(hashtable, "Cau", hash_function_basic);
+    //delete_element(ht, "Hdm",hash_function_basic);
+    //delete_element(ht, "Hel",hash_function_basic);
+}
 
 int main(){
 
     ht* hashtable = create_hashtable(CAPACITY);
-    ht_insert(hashtable, "Potato", "Delicious");
-    ht_insert(hashtable, "second entry", "banana");
+    //insert_test(hashtable);
+    //print_hashtable(hashtable);
 
-    //"Cau" and "Hel" have the same index when hashed with hash_function_basic()
-    ht_insert(hashtable, "Cau", "Crash 1");
-    ht_insert(hashtable, "Hel", "Crash 2");
-    ht_insert(hashtable, "Hdm", "Crash 3");
-
-
-    search_hashtable(hashtable, "Potato");
-    search_hashtable(hashtable, "Hel");
-    delete_element(hashtable, "Hdm");
+    delete_test(hashtable);
+    
     print_hashtable(hashtable);
 
     ht* ht = create_hashtable(CAPACITY);
     size_test(ht);
+    insert_key_test(ht);
 
     //free_hashtable(hashtable);
     return 0;
 }
 
+//Testing modules
+/*
+1. Insert
+    Adding elements over capacity
+        Should return "The table is full"
+    Same key, different value
+        should add and update the value
+    Different key, using overfull box
+2. Search
+    Elements in the table
+        -> in the items slot
+        -> in the overfull slot
+    Elements outside the table
+        returns not found
+3. Delete
+    Elements that are not in the table
+        should return not in the table
+    Elements in the table:
+        ->in items
+        ->head item of overfull chain
+        ->item somewhere in the overfull chain
+        ->different key but same hash value
+4. Hash Function
+    Modify 
+*/
