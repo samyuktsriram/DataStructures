@@ -218,6 +218,11 @@ void ht_insert(ht* ht, char* key, char* value, int (*hashfun) (char*)){
             return;
         }
         while (temp->next != NULL){
+            if (strcmp(key, temp->item->key) == 0){ //If the key is the same, we update the value
+            free(temp->item->value);
+            temp->item->value = (char*) calloc (strlen(value)+1, sizeof(char));
+            strcpy(temp->item->value, value);
+            }
             temp = temp->next;
             //This will go to the last full overflow bucket in the chain
         }
@@ -248,11 +253,6 @@ char* search_hashtable(ht* ht, char* key, int (*hashfun) (char*)){
             LinkedList* temp = ht->overflow[index];
 
             while (temp != NULL){
-                if (strcmp(temp->item->key, key)==0){
-                    printf("Found the element in overflow!\n");
-                    printf("Key: %s, Value: %s, \n", temp->item->key, temp->item->value);
-                    return temp->item->value;
-                }
                 temp = temp->next;
             }
             printf("This key doesn't exist in the table, overflows checked\n");
@@ -347,11 +347,6 @@ void size_test(ht* ht){
     }
     //print_hashtable(ht);
 }
-void insert_key_test(ht* ht){
-    //This assumes the table is full with indexes:
-    ht_insert(ht, int_to_string(30), "This is the replaced element, success!", hash_function_complex);
-    search_hashtable(ht, int_to_string(30), hash_function_complex);
-}
 
 void insert_test(ht* ht){
     ht_insert(ht, "Potato", "Delicious", hash_function_basic);
@@ -361,17 +356,18 @@ void insert_test(ht* ht){
     ht_insert(ht, "Cau", "Crash 1", hash_function_basic);
     ht_insert(ht, "Hel", "Crash 2", hash_function_basic);
     ht_insert(ht, "Hdm", "Crash 3", hash_function_basic);
+    ht_insert(ht, "Cau", "This is the replaced element, success!", hash_function_basic);
 
     search_hashtable(ht, "Potato", hash_function_basic);
     search_hashtable(ht, "Hel", hash_function_basic);
 }
 
-void delete_test(ht* hashtable){
+void insert_delete_test(ht* hashtable){
     insert_test(hashtable);
     delete_element(hashtable, "Bbu",hash_function_basic);
-    delete_element(hashtable, "Cau", hash_function_basic);
-    //delete_element(ht, "Hdm",hash_function_basic);
-    //delete_element(ht, "Hel",hash_function_basic);
+    //delete_element(hashtable, "Cau", hash_function_basic);
+    delete_element(hashtable, "Hdm",hash_function_basic);
+    //delete_element(hashtable, "Hel",hash_function_basic);
 }
 
 int main(){
@@ -380,13 +376,12 @@ int main(){
     //insert_test(hashtable);
     //print_hashtable(hashtable);
 
-    delete_test(hashtable);
+    insert_delete_test(hashtable);
     
     print_hashtable(hashtable);
 
     ht* ht = create_hashtable(CAPACITY);
     size_test(ht);
-    insert_key_test(ht);
 
     //free_hashtable(hashtable);
     return 0;
