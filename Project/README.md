@@ -1,5 +1,5 @@
 1. How to run this
-    Just run the hash_table.c file. I ran into some strange errors with some functions on testing the code, but it runs perfectly on https://www.onlinegdb.com/ . If there is any trouble, please just run it there.
+    Just run the hash_table.c file. main() calls all the relevant testing functions. I ran into some strange errors with some functions on testing the code, but it runs perfectly on https://www.onlinegdb.com/ . If there is any trouble, please just run it there.
     You should see some output from the testing function that roughly tells you what is going on.
 
 2. Implementation details
@@ -13,10 +13,10 @@
 
     I'm writing each function myself based on the reference, especially insert, delete and search.
     The basic hash function initially will create collisions in the testing module, which are handled using overflow buckets and separate chaining. This has been implemented with linked lists.
-    The complex hash function does not create collisions. 
+    The complex hash function does not create collisions. the testing functions
 
 3. Testing modules
-    The insert_delete_test function tests all the following situations:
+    The insert_delete_test and size_test functions tests all the following situations:
     1. Insert
     Adding elements over capacity
         Should return "The table is full"
