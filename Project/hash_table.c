@@ -154,7 +154,7 @@ void free_hashtable(ht* ht){
 
 void print_hashtable(ht* ht){
     //Goes through all the indexes and prints the non-null ones
-    printf("\n \n Here's the entire hashtable: \n");
+    printf("\n \nHere's the entire hashtable: \n");
     for (int i=0; i<ht->size; i++){
         if (ht->items[i] != NULL){
             printf("Key: %s, Value: %s, Index: %d \n", ht->items[i]->key, ht->items[i]->value, i);
@@ -330,6 +330,7 @@ void delete_element(ht* ht, char* key, int (*hashfun) (char*)){
 //Additional Testing routines
 
 //https://stackoverflow.com/questions/8257714/how-to-convert-an-int-to-string-in-c
+//Useful for generating a lot of unique keys, see size_test function below.
 char* int_to_string(int n){
     int x = n;
     int length = snprintf(NULL, 0, "%d", x);
@@ -339,8 +340,9 @@ char* int_to_string(int n){
 }
 
 void size_test(ht* ht){
-    int size_max = ht->size; // testing capacity was 500
-    for (int j=0; j<size_max+2; j++){
+    printf("Filling the entire table, and trying to insert beyond max size. Should return 'table is full' message\n");
+    int size_max = ht->size;
+    for (int j=0; j<size_max+5; j++){
         ht_insert(ht, int_to_string(j), "Testing", hash_function_basic);
         //printf("Count: %d", ht->count);
     }
